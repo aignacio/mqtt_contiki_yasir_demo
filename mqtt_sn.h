@@ -17,12 +17,12 @@
   under the License.
 
  *******************************************************************************
- * @license Este projeto está sendo liberado pela licença APACHE 2.0.
+ * @license This project is licensed under APACHE 2.0.
  * @file mqtt_sn.h
- * @brief Conjunto de protótipos e definiçoes do protocolo MQTT-SN
+ * @brief Header of prototypes and cfg variables for the MQTT-SN API
  * @author Ânderson Ignácio da Silva
  * @date 19 Ago 2016
- * @brief Arquivo principal do código fonte do porte do MQTT-SN para o Contiki
+ * @brief Main file for the MQTT-SN Contiki PORT
  * @see http://www.aignacio.com
  */
 
@@ -39,19 +39,19 @@
 #include <stdbool.h>
 
 /*! \addtogroup MQTT_SN_DEBUG
-*  Macros de debug utilizadas para o MQTT-SN
+*  DEBUG Macros for MQTT-SN
 *  @{
 */
 /*!
-  @brief Se definida habilita mensagens de debug da rede MQTT-SN
+  @brief If the below macro is defined, debug message will apear in the console window of the devices
 */
 //#define DEBUG_MQTT_SN
 /*!
-  @brief Se definida habilita mensagens de debug do sistema operacional
+  @brief  If defined, enables the OS messages (Contiki friendly) used by the MQTT-SN API
 */
 #define DEBUG_OS
 /*!
-  @brief Se definida habilita mensagens de debug de tarefas da fila utilizada pelo MQTT-SN
+  @brief If defined, enables the debug messages of the tasks used in the process of initialize a MQTT-SN Connection
 */
 #define DEBUG_TASK
 //#define DEBUG_UDP
@@ -82,7 +82,7 @@
 #endif
 
 /*! \addtogroup MQTT_SN_CONTROL
-*  Macros de protocolos utilizadas para o MQTT-SN
+*  Protocol macros for MQTT-SN
 *  @{
 */
 #define MQTT_SN_MAX_PACKET_LENGTH  (255)
@@ -143,31 +143,31 @@
 /** @}*/
 
 /*! \addtogroup MQTT_SN_CONTROL
-*  Macros de controle utilizadas para o MQTT-SN
+*  Control macros for MQTT-Sn
 *  @{
 */
-#define ss(x) sizeof(x)/sizeof(*x)               /**< Computa o tamanho de um vetor de ponteiros */
-#define MQTT_SN_AUTO_RECONNECT                   /**< Define se o dispositivo deve se auto conectar de tempos em tempos */
-#define MQTT_SN_RETRY_PING        5              /**< Número de tentativas de envio de PING REQUEST antes de desconectar nó <-> broker */
-#define MQTT_SN_TIMEOUT_CONNECT   9*CLOCK_SECOND /**< Tempo base para comunicação MQTT-SN broker <-> nó */
-#define MQTT_SN_TIMEOUT           3*CLOCK_SECOND   /**< Tempo base para comunicação MQTT-SN broker <-> nó */
-#define MQTT_SN_RETRY             5              /**< Número de tentativas de enviar qualquer pacote ao broker antes de desconectar */
-#define MAX_QUEUE_MQTT_SN         100            /**< Número máximo de tarefas a serem inseridas alocadas dinamicamente MQTT-SN */
-#define MAX_TOPIC_USED            100            /**< Número máximo de tópicos que o usuário pode registrar, a API cria um conjunto de estruturas para o bind de topic e short topic id */
+#define ss(x) sizeof(x)/sizeof(*x)               /**< Compute the size of a vector of pointers, used by some functions */
+#define MQTT_SN_AUTO_RECONNECT                   /**< Define if the device will try to reconnect or not to the MQTT-SN broker, if defined enables it */
+#define MQTT_SN_RETRY_PING        5              /**< Number of attempts of send PING REQUEST beforce disconnect to the node <-> broker */
+#define MQTT_SN_TIMEOUT_CONNECT   9*CLOCK_SECOND /**< Timeout of communication between MQTT-SN broker <-> node in the CONNECT STEP */
+#define MQTT_SN_TIMEOUT           3*CLOCK_SECOND /**< Timeout of communication between MQTT-SN broker <-> node already connected */
+#define MQTT_SN_RETRY             5              /**< Number of attemps of send any packet to the broker before disconnect */
+#define MAX_QUEUE_MQTT_SN         100            /**< Max. number of tasks to be dynamic allocated in the MQTT-SN API */
+#define MAX_TOPIC_USED            100            /**< Max. number of topics that the user can register,the API creates a set of structures for the bind between topic ID and short topic ID */
 /** @}*/
 
 /*! \addtogroup Pacotes
-*  Macros de debug utilizadas para o MQTT-SN
+*  DEBUG macros used for the MQTT-SN protocol
 *  @{
 */
 /** @struct disconnect_packet_t
- *  @brief Estrutura de pacote de desconexão do broker MQTT-SN
+ *  @brief Structures of disconnect packet for the MQTT-SN
  *  @var disconnect_packet_t::length
- *    Comprimento do pacote
+ *    Length of the packet
  *  @var disconnect_packet_t::msg_type
- *    Tipo de mensagem
+ *    Type of message
  *  @var disconnect_packet_t::duration
- *    Duração do tempo de desconexão, utilizado para sleeping devices (ver especificação do broker)
+ *    Time duration of disconnection, used for sleeping devices (see the MQTT-SNv1.2, broker specificaiton)
  */
 typedef struct __attribute__((packed)){
   uint8_t length;
@@ -176,13 +176,13 @@ typedef struct __attribute__((packed)){
 } disconnect_packet_t;
 
 /** @struct ping_req_t
- *  @brief Estrutura de pacote de desconexão do broker MQTT-SN
+ *  @brief Structures of ping packet for the MQTT-SN
  *  @var ping_req_t::length
- *    Comprimento do pacote
+ *    Length of the packet
  *  @var ping_req_t::msg_type
- *    Tipo de mensagem
+ *    Type of message
  *  @var ping_req_t::client_id
- *    Nome do identificador de cliente para conexão MQTT-SN
+ *    Client ID for the MQTT-SN Connection
  */
 typedef struct __attribute__((packed)){
   uint8_t length;
@@ -191,19 +191,19 @@ typedef struct __attribute__((packed)){
 } ping_req_t;
 
 /** @struct publish_packet_t
- *  @brief Estrutura de pacote de publicação MQTT-SN
+ *  @brief Publish structure packet for the MQTT-SN
  *  @var publish_packet_t::length
- *    Comprimento do pacote
+ *    Length of the packet
  *  @var publish_packet_t::type
- *    Tipo de mensagem
+ *    Type of message
  *  @var publish_packet_t::flags
- *    Flags utilizadas (retain,DUP,QoS...)
+ *    Flags used (retain,DUP,QoS...)
  *  @var publish_packet_t::topic_id
- *    Identificador do topic id registrado no broker, para publicar necessita-se o registro prévio
+ *    Topic ID registered in the broker, needed to register first in the broker to publish
  *  @var publish_packet_t::message_id
- *    Identificador de Mensagem
+ *    Message identifier - ID
  *  @var publish_packet_t::data
- *    Dado a ser publicado no tópico definido
+ *    Data to be published in the defined topic
  */
 typedef struct __attribute__((packed)){
   uint8_t length;
@@ -215,17 +215,17 @@ typedef struct __attribute__((packed)){
 } publish_packet_t;
 
 /** @struct subscribe_wildcard_packet_t
- *  @brief Estrutura de pacote de inscrição do tipo Wildcard MQTT-SN
+ *  @brief Packet structure for the subscribe Wildcard mode for the MQTT-SN
  *  @var subscribe_wildcard_packet_t::length
- *    Comprimento do pacote
+ *    Length of the packet
  *  @var subscribe_wildcard_packet_t::type
- *    Tipo de mensagem
+ *    Type of message
  *  @var subscribe_wildcard_packet_t::flags
- *    Flags utilizadas (retain,DUP,QoS...)
+ *    Flags used (retain,DUP,QoS...)
  *  @var subscribe_wildcard_packet_t::message_id
- *    Identificador de mensagem utilizada para receber o pacote correspondente
+ *    Message identifier - ID used to receive the correspondent packet
  *  @var subscribe_wildcard_packet_t::topic_name
- *    Tópico do tipo wildcard para se inscrever
+ *    Topic of type wildcard to subscribe
  */
 typedef struct __attribute__((packed)) {
   uint8_t length;
@@ -236,17 +236,17 @@ typedef struct __attribute__((packed)) {
 } subscribe_wildcard_packet_t;
 
 /** @struct subscribe_packet_t
- *  @brief Estrutura de pacote MQTT-SN do tipo SUBSCRIBE
+ *  @brief Subscribe packet structure for the MQTT-SN
  *  @var subscribe_packet_t::length
- *    Comprimento do pacote
+ *    Length of the packet
  *  @var subscribe_packet_t::type
- *    Tipo de mensagem
+ *    Type of message
  *  @var subscribe_packet_t::flags
- *    Flags utilizadas (retain,DUP,QoS...)
+ *    Flags used (retain,DUP,QoS...)
  *  @var subscribe_packet_t::message_id
- *    Identificador de mensagem utilizada para receber o pacote correspondente
+ *    Message identifier - ID used to receive the correspodent packet
  *  @var subscribe_packet_t::topic_id
- *    Topic ID pré-registrado com o tópico correspondente a inscrição (tópico deve estar inserido na lista de registro)
+ *    Topic ID pre-registered with the topic correspondent to the subscription (topic must be inserted in the register list/vector in the beginning)
  */
 typedef struct __attribute__((packed)) {
   uint8_t length;
@@ -257,18 +257,18 @@ typedef struct __attribute__((packed)) {
 } subscribe_packet_t;
 
 /** @struct connect_packet_t
- *  @brief Estrutura de pacotes MQTT-SN do tipo CONNECT
+ *  @brief Packet structure MQTT-SN of type CONNECT
  *  @var connect_packet_t::length
- *    Comprimento total do pacote MQTT-SN
+ *    Total length of the packetMQTT-SN
  *  @var connect_packet_t::type
- *    Descreve o tipo de mensagem que será enviado ao broker
+ *    Describe the type of message that'll be send to the broker
  *  @var connect_packet_t::flags
- *    Contém os parâmetros de flag que serão enviados como (DUP,QoS,Retain,Will,
+ *    Has all the flag parameters that'll be send like (DUP,QoS,Retain,Will,
  *    CleanSession, TopicType)
  *  @var connect_packet_t::protocol_id
- *    Presente somente no CONNECT indicando versão do protocolo e o nome
+ *    Present just when CONNECT, indicating the protocol version and the name
  *  @var connect_packet_t::duration
- *    Indica a duração de um período em segundos podendo ser de até 18 Horas
+ *    Indicates the time duration in seconds that could be until eighteen hours
  */
 typedef struct __attribute__((packed)) {
   uint8_t length;
@@ -280,17 +280,17 @@ typedef struct __attribute__((packed)) {
 } connect_packet_t;
 
 /** @struct register_packet_t
- *  @brief Estrutura de pacotes MQTT-SN do tipo REGISTER
+ *  @brief Packet structure MQTT-SN of type REGISTER
  *  @var register_packet_t::length
- *    Comprimento total do pacote MQTT-SN
+ *    Total length of the packet MQTT-SN
  *  @var register_packet_t::type
- *    Descreve o tipo de mensagem que será enviado ao broker
+ *    Describe the type of message that'll be send to the broker
  *  @var register_packet_t::topic_id
- *    Short Topic que será utilizado para envio do REGISTER - Quando enviado pelo nó, usa-se 0x0000
+ *    Short Topic that'll be used in the packet REGISTER - When send by the node, it'll use 0x0000
  *  @var register_packet_t::message_id
- *    Identificador único do REGACK correspondente enviado pelo broker normalmente
+ *    Identifier unique for the REGACK packet that'll be send by the broker usually
  *  @var register_packet_t::topic_name
- *    Nome do tópico a ser registrado
+ *    Name of the topic that'll be registered
  */
 typedef struct __attribute__((packed)){
   uint8_t length;
@@ -301,16 +301,16 @@ typedef struct __attribute__((packed)){
 } register_packet_t;
 
 /** @struct willtopic_packet_t
- *  @brief Estrutura de pacotes MQTT-SN do tipo WILL TOPIC
+ *  @brief Packet structure MQTT-SN of type WILL TOPIC
  *  @var willtopic_packet_t::length
- *    Comprimento total do pacote MQTT-SN
+ *    Total length of the packet MQTT-SN
  *  @var willtopic_packet_t::type
- *    Descreve o tipo de mensagem que será enviado ao broker
+ *    Describe the type of message that'll be send to the broker
  *  @var willtopic_packet_t::flags
- *    Contém os parâmetros de flag que serão enviados como (DUP,QoS,Retain,Will,
+ *    Has all the parameters that'll be send like(DUP,QoS,Retain,Will,
  *    CleanSession, TopicType)
  *  @var willtopic_packet_t::will_topic
- *    Tópico no qual será publicada a mensagem quando o dispositivo se desconectar
+ *    Topic where it'll be published the message when the device disconnect (LW teastment)
  */
 typedef struct __attribute__((packed)){
   uint8_t length;
@@ -320,13 +320,13 @@ typedef struct __attribute__((packed)){
 } willtopic_packet_t;
 
 /** @struct willmessage_packet_t
- *  @brief Estrutura de pacotes MQTT-SN do tipo WILL MESSAGE
+ *  @brief Packet structure MQTT-SN of type WILL MESSAGE
  *  @var willmessage_packet_t::length
- *    Comprimento total do pacote MQTT-SN
+ *    Total length of the packetMQTT-SN
  *  @var willmessage_packet_t::type
- *    Descreve o tipo de mensagem que será enviado ao broker
+ *    Describe the type of message that'll be send to the broker
  *  @var willmessage_packet_t::will_message
- *    Contém a mensagem que será publicada quando o dispositivo se desconectar
+ *    Mesage it'll be published when the device disconnect (LW teastment)
  */
 typedef struct __attribute__((packed)){
   uint8_t length;
@@ -335,17 +335,17 @@ typedef struct __attribute__((packed)){
 } willmessage_packet_t;
 
 /** @struct regack_packet_t
- *  @brief Estrutura de pacotes MQTT-SN do tipo REGACK
+ *  @brief Packet structure MQTT-SN of type REGACK
  *  @var regack_packet_t::length
- *    Comprimento total do pacote MQTT-SN
+ *    Total length of the packet MQTT-SN
  *  @var regack_packet_t::type
- *    Descreve o tipo de mensagem que será enviado ao broker
+ *    Describe the type of message that'll be send to the broker
  *  @var regack_packet_t::topic_id
- *    Short Topic que será utilizado para recebimento de mensagem REGISTER - Quando enviado pelo broker envia ao nó
+ *    Short Topic that'll be used for the packets of type REGISTER - When send by the brker to the node
  *  @var regack_packet_t::message_id
- *    Identificador único do REGACK correspondente enviado pelo broker normalmente
+ *    Identifier unique for the REGACK packet that'll be send by the broker usually
  *  @var regack_packet_t::return_code
- *    Código de retorno da mensagem
+ *    Return code for the message
  */
 typedef struct __attribute__((packed)){
   uint8_t length;
@@ -357,20 +357,20 @@ typedef struct __attribute__((packed)){
 /** @}*/
 
 /** @typedef mqtt_sn_cb_f
- *  @brief Tipo de função de callback que deve ser repassada ao broker
+ *  @brief Callback type of function that'll be called when the broker send something
  */
 typedef void (*mqtt_sn_cb_f)(char *,char *);
 
 /** @struct mqtt_sn_task_t
- *  @brief Estrutura de tarefa de fila MQTT-SN
+ *  @brief Task structure of queue MQTT-SN
  *  @var mqtt_sn_task_t::msg_type_q
- *    Tipo de mensagem a ser alocada
+ *    Type of message to be allocated
  *  @var mqtt_sn_task_t::short_topic
- *    Tópico curto ou topic id a ser publicado/inscrito
+ *    Short topic to be published/subscribed
  *  @var mqtt_sn_task_t::qos_level
- *    Nível QoS da tarefa a ser alocada na pilha
+ *    QoS level of the task to be allocated in the FIFO
  *  @var mqtt_sn_task_t::id_task
- *    Identificador da tarefa
+ *    Task identifier
  */
 typedef struct {
   uint8_t  msg_type_q;
@@ -381,11 +381,11 @@ typedef struct {
 } mqtt_sn_task_t;
 
 /** @struct node
- *  @brief Estrutura de fila MQTT-SN
+ *  @brief FIFO Queue struct MQTT-SN
  *  @var data
- *    Tarefa a ser processada
+ *    Task to be processed
  *  @var link
- *    Link para a próxima tarefa
+ *    Link for the next task
  */
 struct node {
     mqtt_sn_task_t data;
@@ -393,12 +393,12 @@ struct node {
 }*mqtt_queue_first, *mqtt_queue_last;
 
 /** @typedef resp_con_t
- *  @brief Tipo de erros de funções
+ *  @brief Type of function error
  *  @var SUCCESS_CON::FAIL_CON
- *    Erro ao processar algo
+ *    Error to process something
  *  @var SUCCESS_CON::SUCCESS_CON
- *    Sucesso ao processar algo
- *  @todo Implementar mais tipos de erros
+ *    Success to process something
+ *  @todo implement more types of errors
  */
 typedef enum resp_con{
    FAIL_CON,
@@ -406,7 +406,7 @@ typedef enum resp_con{
 } resp_con_t;
 
 /** @typedef short_topics_t
- *  @brief Estrutura para controle de tópicos e tópicos curtos
+ *  @brief Control structure of short type of topics
  */
 typedef struct {
    char *topic_name;
@@ -415,7 +415,7 @@ typedef struct {
 } short_topics_t;
 
 /** @typedef mqtt_sn_status_t
- *  @brief Estados da ASM do MQTT-SN
+ *  @brief FSM states of the MQTT-SN
  */
 typedef enum {
   MQTTSN_CONNECTION_FAILED,
@@ -435,17 +435,17 @@ typedef enum {
 } mqtt_sn_status_t;
 
 /** @struct mqtt_sn_con_t
- *  @brief Estrutura de conexão ao broker MQTT-SN
+ *  @brief Connection structure of the MQTT-SN broker
  *  @var mqtt_sn_con_t::simple_udp_connection
- *    Handle da conexão UDP com o broker
+ *    Handle of UDP connection with the broker
  *  @var mqtt_sn_con_t::udp_port
- *    Porta UDP de conexão com o broker (default:1884)
+ *    UDP port of connection with the broker (default:1884)
  *  @var mqtt_sn_con_t::ipv6_broker
- *    Endereço IPv6 do broker UDP
+ *    IPv6 address of the broker UDP
  *  @var mqtt_sn_con_t::keep_alive
- *    Tempo de requisição Keep Alive para PINGREQ e PINGRESP
+ *    Requisition time of Keep Alive for PINGREQ and PINGRESP
  *  @var mqtt_sn_con_t::client_id
- *    Identificador de cliente para conexão com o broker MQTT-SN
+ *    Client ID with the broker
  */
 typedef struct {
   struct simple_udp_connection udp_con;
@@ -457,399 +457,391 @@ typedef struct {
   char *will_message;
 } mqtt_sn_con_t;
 
-/** @brief Insere uma tarefa na fila
+/** @brief Insert a task in the queue
  *
- * 		Insere uma nova tarefa na fila de requisições a serem processadas.
+ * 		Insert a new task in the queue to be processed
  *
- *  @param [in] new Nova tarefa a ser processada pela ASM do MQTT-SN
+ *  @param [in] new New task to be processed by the FSM MQTT-SN
  *
- *  @retval FAIL_CON         Não foi possível alocar uma nova tarefa a fila
- *  @retval SUCCESS_CON      Foi possível alocar uma nova tarefa a fila
+ *  @retval FAIL_CON         Cannot be possible allocate a new task in the queue
+ *  @retval SUCCESS_CON      Success to allocate a new task in the queue
  *
- * 	@todo		Melhorar alocação dinâmica de memória
+ * 	@todo		Increase the performance of execution time
  **/
 resp_con_t mqtt_sn_insert_queue(mqtt_sn_task_t new);
 
-/** @brief Remove o elemento mais próximo de ser processado
+/** @brief Removes the first of the Queue to process
  *
- * 		Realiza a remoção do elemento mais próximo de ser processado, no caso o
- *    mais antigo inserido na fila
+ * 		Remove the first of the queue to process
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  *
- * 	@todo	Adicionar opção de exclusão intermediária
+ * 	@todo	add middle exclusion
  **/
 void mqtt_sn_delete_queue();
 
-/** @brief Lista as tarefas da fila
+/** @brief List of taks in the queue
  *
- * 		Percorre os links dos ponteiros listando os elementos a serem
- *    processados pela ASM do MQTT-SN
+ * 		Run for the queue to print the task allocated before
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  *
  **/
 void mqtt_sn_check_queue();
 
-/** @brief Envia requisição de conexão ao broker MQTT-SN
+/** @brief Send connection requisition to the broker
  *
- * 		Realiza o envio de mensagens do tipo CONNECT ao broker MQTT-SN
+ * 		Send CONNECT type of messages to the broker MQTT-SN
  *
- *  @param [in] rc Código de retorno da requisição MQTT (Return Code)
+ *  @param [in] rc Return code of requisition MQTT (Return Code)
  *
- *  @retval FAIL_CON      Falha por algum motivo no código de retorno
- *  @retval SUCCESS_CON   Sucesso no recebimento do código de retorno
+ *  @retval FAIL_CON     Fail for some reason in the return code
+ *  @retval SUCCESS_CON   Success the return code
  *
- * 	@todo		Expandir o tipo de falha para tornar mais precisa a depuração
- *          futura
+ * 	@todo		Expand the return fail type to be more understoodable
  **/
 resp_con_t mqtt_sn_check_rc(uint8_t rc);
 
-/** @brief Realiza o parsing das mensagens UDP recebidas
+/** @brief Execute the parsing of receive messages
  *
- * 		Realiza o parsing das mensagens UDP recebidas de acordo com
- *    o protocolo MQTT-SN, alterando o status da conexão geral com
- *    o broker.
+ * 	 Parse the messages according to the MQTT-SN protocol, changing the connection status with the broker
  *
- *  @param [in] data Ponteiro para o conteúdo UDP recebido
+ *  @param [in] data Pointer to the UDP received data
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  **/
 void mqtt_sn_recv_parser(const uint8_t *data);
 
-/** @brief Inicia conexão ao broker UDP
+/** @brief Initialize the UDP connection with the broker
  *
- * 		Estabelece a conexão com um servidor MQTT-SN, através
- *    da porta 1884 além de iniciar a fila
- *    de processos de conexão do protocolo.
+ *    Stabilizes a connection with the MQTT-SN broker/server, through the 1884 port, besides init. the queue mechanism of taks
  *
- *  @param [in] mqtt_sn_connection Estrutura padrão de comunicação MQTT-SN
- *  @param [in] topics Vetor de tópicos a serem registrados
- *  @param [in] topic_len Tamanho do vetor de tópicos a serem registrados
- *  @param [in] mqtt_sn_cb_f Ponteiro para função de callback para recebimento das mensagens MQTT-SN
+ *  @param [in] mqtt_sn_connection Default structure of communication in MQTT-SN
+ *  @param [in] topics Vector of registered topics
+ *  @param [in] topic_len Size of the vector of topics to be registered
+ *  @param [in] mqtt_sn_cb_f Pointer for the callback function that'll process the received messages
  *
- *  @retval FAIL_CON      Falha ao alocar conexão UDP
- *  @retval SUCCESS_CON   Sucesso ao alocar conexão UDP
+ *  @retval FAIL_CON      Fail to stabilishes the UDP connection
+ *  @retval SUCCESS_CON   Success to stabilishes the UDP connection
  *
  **/
 resp_con_t mqtt_sn_create_sck(mqtt_sn_con_t mqtt_sn_connection, char *topics[],size_t topic_len, mqtt_sn_cb_f cb_f);
 
-/** @brief Envio de mensagens ao broker do tipo REGISTER
+/** @brief Envio de mensagens ao broker of type REGISTER
  *
- * 		Envia ao broker mensagens do tipo REGISTER com o topic name informado conforme a tarefa
- *    primeira na fila
+ * 		Send to the broker packets of type REGISTER with the topic name according to the first element in the queue of tasks
  *
- *  @param [in] 0 Não recebe parâmetro
+ *  @param [in] 0 Doesn't receive parameter
  *
- *  @retval FAIL_CON      Falha ao enviar o pacote REGISTER
- *  @retval SUCCESS_CON   Sucesso ao enviar o pacote REGISTER
+ *  @retval FAIL_CON      Fail to send the REGISTER packet
+ *  @retval SUCCESS_CON   Success to send the REGISTER packet
  *
  **/
 resp_con_t mqtt_sn_reg_send(void);
 
-/** @brief Checa o status da conexão MQTT-SN
+/** @brief Check the connection state with the broker MQTT-SN
  *
- * 		Retorna o status da conexão MQTT-SN baseado na estrutura mqtt_sn_status_t
+ * 		Returns the statues of connection based on the structure mqtt_sn_status_t
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval mqtt_sn_status_t Estado da conexão
+ *  @retval mqtt_sn_status_t State of connection
  *
  **/
 mqtt_sn_status_t mqtt_sn_check_status(void);
 
-/** @brief Envia requisição de conexão ao broker MQTT-SN
+/** @brief Send requisition to the broker MQTT-SN
  *
- * 		Realiza o envio de mensagens do tipo CONNECT ao broker MQTT-SN
+ * 		Realizes the send of messages of type CONNECT to the broker MQTT-SN
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval FAIL_CON      Falha ao enviar o pacote CONNECT
- *  @retval SUCCESS_CON   Sucesso ao enviar o pacote CONNECT
+ *  @retval FAIL_CON      Fail to send CONNECT packet
+ *  @retval SUCCESS_CON   Success to send CONNECT packet
  *
  **/
 resp_con_t mqtt_sn_con_send(void);
 
-/** @brief Checa o status da fila de tarefas MQTT-SN
+/** @brief Check the status of the tasks in the queue
  *
- * 		Percorra a lista encadeada de tarefas para verificar se está vazia
+ * 		Run the tasks vector to check the status
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval TRUE  Fila vazia
- *  @retval FALSE  Há tarefas a serem processadas
+ *  @retval TRUE  Empty queue
+ *  @retval FALSE  There're tasks to be processed
  *
  **/
 bool mqtt_sn_check_empty(void);
 
-/** @brief Retorna a string de status correspondente
+/** @brief Return a correspondent string to the statue
  *
- * 		Realiza o parsing do estado da conexão MQTT-SN traduzindo de typedef enum para estado em string
+ * 		Realizes the parse of connections status translating from typedef enum to the state in a string
  *
- *  @param [in] type Não recebe argumento
- *  @param [in] type_string Não recebe argumento
+ *  @param [in] type type of status to translate
+ *  @param [in] type_string variable that'll receive the string message
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  *
  **/
 void parse_mqtt_type_string(uint8_t type, char **type_string);
 
-/** @brief Inicializa PROCESS_THREAD MQTT-SN
+/** @brief Initializes the PROCESS_THREAD MQTT-SN
  *
- * 		Inicializa a PROCESS_THREAD de MQTT-SN bem como as variáveis utilizadas e a alocaçãod e eventos
+ * 		Initializes the PROCESS_THREAD of MQTT-SN as other variables used for events
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  *
  **/
 void mqtt_sn_init(void);
 
-/** @brief Envia pacote PUBLISH ao broker MQTT-SN
+/** @brief Send PUBLISH packet to the broker MQTT-SN
  *
- * 		Monta o pacote e envia ao broker a mensagem de publicação
+ * 		Create the packet and send to the broker the publishing
  *
- *  @param [in] topic Tópico a ser publicado
- *  @param [in] message Mensagem a ser publicada
- *  @param [in] qos Nível de QoS da publicação
+ *  @param [in] topic Topic that'll be published
+ *  @param [in] message Message to publish
+ *  @param [in] qos QoS level of publication
  *
- *  @retval FAIL_CON      Falha ao enviar a publicação
- *  @retval SUCCESS_CON   Sucesso ao enviar a publicação
+ *  @retval FAIL_CON      Fail to publish
+ *  @retval SUCCESS_CON   Success publish
  *
  **/
 resp_con_t mqtt_sn_pub_send(char *topic,char *message, bool retain_flag, uint8_t qos);
 
-/** @brief Checa o status da conexãoe em String
+/** @brief Check the status of connection in a string mode
  *
- * 		Verifica o status da conexão MQTT-SN e retorna uma string com o estado
+ * 		Verify the status of connection and send the status in a string mode
  *
- *  @param [in] Não recebe argumento
+ *  @param [in] Doesn't receive args
  *
- *  @retval STRING  String do estado atual da conexão MQTT-SN
+ *  @retval STRING  String of the actual status of connection MQTT-SN
  *
  **/
 char* mqtt_sn_check_status_string(void);
 
-/** @brief Gera a flag de nível QoS
+/** @brief Generate the QoS flag
  *
- * 		Retorna o estado da flag correspondente ao nível QoS enviado
+ * 		Return the flag state correspondent to the QoS sent
  *
- *  @param [in] qos Nível QoS desejado
+ *  @param [in] QoS level desired
  *
- *  @retval QoS Retorna a flag do nível QoS desejado
+ *  @retval QoS Return the desired QoS level flag
  *
  **/
 uint8_t mqtt_sn_get_qos_flag(int8_t qos);
 
-/** @brief Prepara requisição de publicação ao broker MQTT-SN
+/** @brief Prepare the requisiton of publish to the broker MQTT-SN
  *
- * 		Formata e gera a tarefa na fila para publicação no tópico pré-registrado
+ * 		Format and generate the task in the queue to publish in the pre-registered topic
  *
- *  @param [in] topic Tópico a ser publicado
- *  @param [in] message Mensagem a ser publicada
- *  @param [in] retain_flag Identificador de mensagem retentiva
- *  @param [in] qos Nível de QoS da publicação
+ *  @param [in] topic Topic to be published
+ *  @param [in] message Message to publish
+ *  @param [in] retain_flag Message identifier - ID retain
+ *  @param [in] qos QoS level of the publish
  *
- *  @retval FAIL_CON      Falha ao gerar a tarefa de publicação
- *  @retval SUCCESS_CON   Sucesso ao gerar a tarefa de publicação
+ *  @retval FAIL_CON      Fail to generate the task required
+ *  @retval SUCCESS_CON   Success to generate the task required
  *
  **/
 resp_con_t mqtt_sn_pub(char *topic,char *message, bool retain_flag, uint8_t qos);
 
-/** @brief Exibe os tópicos registrados
+/** @brief Shows the registered topics
  *
- * 		Exibe a lista de tópicos registrados no broker
+ * 		Shows the list of registered topics in the broker
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  *
  **/
 void print_g_topics(void);
 
-/** @brief Processa timeout de pacotes
+/** @brief Process the timeout of packets
  *
- * 		Processa toda e qualquer requisição de expiração de tempo por timeout de envio de mensagens (SUBSCRIBE, PUBLISH, REGISTER)
+ *    Process all and any req. of expiration by tiemout expiration in the sent messages (SUBSCRIBE, PUBLISH, REGISTER)
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  *
  **/
 void timeout_con(void *ptr);
 
-/** @brief Processa timeout de ping
+/** @brief Process the timeout of ping
  *
- * 		Processa toda expiração de tempo por timeout de envio de mensagens PINGREQ
+ * 		Process timeout of messages type PINGREQ
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  *
  **/
 void timeout_ping_mqtt(void *ptr);
 
-/** @brief Envia requisição de ping ao broker
+/** @brief Send ping recognition to the broker
  *
- * 		Envia requisição de ping ao broker diretamente por mensagens PING REQ
+ * 		Send the requisition tot he broker directly by PING REQ messages
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna nada
+ *  @retval 0 Doesn't return data
  *
  **/
 void mqtt_sn_ping_send(void);
 
-/** @brief Libera opção de geração de tarefas
+/** @brief Release the generate task option
  *
- * 		Habilita a geração de tarefas na fila conforma o estado da conexão MQTT-SN
+ * 	Enables the generation of tasks according to the MQTT-SN status of connection
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval TRUE Pode-se gerar tarefa na fila
- *  @retval FALSE Estado da conexão MQTT-SN impossibilita geração de tarefas na fila
+ *  @retval TRUE Can generate task in the queue
+ *  @retval FALSE MQTT-SN status connection cannot generate tasks
  *
  **/
 bool unlock_tasks(void);
 
-/** @brief Prepara requisição de inscrição ao broker MQTT-SN
+/** @brief Prepares the requisition to subscribe to the broker MQTT-SN
  *
- * 		Formata e gera a tarefa na fila para inscrição no tópico pré-registrado
+ * 		Format and generate the tasks in the queue to subscribe of pre-registered topic
  *
- *  @param [in] topic Tópico a ser inscrito
- *  @param [in] qos Nível de QoS da inscrição
+ *  @param [in] topic Topic to subscribe
+ *  @param [in] qos QoS level of subscription
  *
- *  @retval FAIL_CON      Falha ao gerar a tarefa de inscrição
- *  @retval SUCCESS_CON   Sucesso ao gerar a tarefa de inscrição
+ *  @retval FAIL_CON      Fail to generate the sub. task
+ *  @retval SUCCESS_CON   Success to generate the sub. task
  *
  **/
 resp_con_t mqtt_sn_sub(char *topic, uint8_t qos);
 
-/** @brief Envia pacote SUBSCRIBE ao broker MQTT-SN
+/** @brief Send packet of type SUBSCRIBE to broker MQTT-SN
  *
- * 		Monta o pacote e envia ao broker a mensagem de inscrição
+ * 		Create and send the packet of type subscribe to the broker
  *
- *  @param [in] topic Tópico a ser inscrito (deve estar pré-listado e passado como argumento em mqtt_sn_create_sck)
- *  @param [in] qos Nível de QoS da publicação
+ *  @param [in] topic Topic to subscribe (must be pre-registered and passed to mqtt_sn_create_sck)
+ *  @param [in] qos QoS level of publish
  *
- *  @retval FAIL_CON      Falha ao enviar a inscrição
- *  @retval SUCCESS_CON   Sucesso ao enviar a inscrição
+ *  @retval FAIL_CON      Fail to send a subscribe
+ *  @retval SUCCESS_CON   Success to send a subscribe
  *
  **/
 resp_con_t mqtt_sn_sub_send(char *topic, uint8_t qos);
 
-/** @brief Envia pacote SUBSCRIBE do tipo WILDCARD ao broker MQTT-SN
+/** @brief Send the packet of SUBSCRIBE of type WILDCARD to the broker MQTT-SN
  *
- * 		Monta o pacote e envia ao broker a mensagem de inscrição do tipo Wildcard (#,+)
+ * 		Create the packet and send to the broker a message of subscribe of type Wildcard (#,+)
  *
- *  @param [in] topic Tópico a ser inscrito (deve estar pré-listado e passado como argumento em mqtt_sn_create_sck)
- *  @param [in] qos Nível de QoS da publicação
+ *  @param [in] topic Topic to subscribe (must be pre-registered and passed to mqtt_sn_create_sck)
+ *  @param [in] qos QoS level of publish
  *
- *  @retval FAIL_CON      Falha ao enviar a inscrição
- *  @retval SUCCESS_CON   Sucesso ao enviar a inscrição
+ *  @retval FAIL_CON      Fail to send a subscribe
+ *  @retval SUCCESS_CON   Success to send a subscribe
  *
  **/
 resp_con_t mqtt_sn_sub_send_wildcard(char *topic, uint8_t qos);
 
-/** @brief Verifica se o tópico já foi registrado
+/** @brief Check if the topic has been already registered
  *
- * 		Verifica se o tópico em análise já foi previamente registrado ou está em processo de registro
+ *    Check if the topic in analisis has beedn already registered or it's in the register process
  *
- *  @param [in] topic Tópico a ser inscrito (deve estar pré-listado e passado como argumento em mqtt_sn_create_sck)
+ *  @param [in] topic Topic to subscribe (must be pre-registered and passed to mqtt_sn_create_sck)
  *
- *  @retval FAIL_CON      Tópico já foi registrado ou está em andamento
- *  @retval SUCCESS_CON   Tópico liberado para inscrição
+ *  @retval FAIL_CON      Topic has been registered or it's in the register process
+ *  @retval SUCCESS_CON   Topic release to subscribe
  *
  **/
 resp_con_t verf_hist_sub(char *topic);
 
-/** @brief Envia pacote DISCONNECT ao broker MQTT-SN
+/** @brief Send the packet DISCONNECT to broker MQTT-SN
  *
- * 		Monta o pacote e envia ao broker a mensagem de desconexão
+ * 		Create the packet and send the broker a disconnection message
  *
- *  @param [in] duration Tempo que irá ficar desconectado, utilizado para sleeping devices
+ *  @param [in] duration Time that'll be disconnected, used for sleeping devices
  *
- *  @retval FAIL_CON      Falha ao enviar a desconexão
- *  @retval SUCCESS_CON   Sucesso ao enviar a desconexão
+ *  @retval FAIL_CON      Fail to send disconnection
+ *  @retval SUCCESS_CON   Success to send disconnection
  *
  **/
 resp_con_t mqtt_sn_disconnect_send(uint16_t duration);
 
-/** @brief Inicializa os vetores MQTT-SN
+/** @brief Initializes the MQTT-SN vectors
  *
- * 		Deleta tarefas na fila e inicializa o vetor de tópicos setando 0xFF aos identificadores de tópico
+ * 		Delete previous tasks in the queue and init. the topic vectors setting 0xFF and topic identifiers
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna argumento
+ *  @retval 0 Doesn't return arguments
  *
  **/
 void init_vectors(void);
 
-/** @brief Inicia o evento de SUBSCRIBE
+/** @brief Init. the event SUBSCRIBE
  *
- * 		Inicia as requisições de inscrição através do evento
+ * 		Init the subscription of events
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval 0 Não retorna argumento
+ *  @retval 0 Doesn't return arguments
  *
  **/
 void init_sub(void *ptr);
 
-/** @brief Verifica pré-registro do tópico
+/** @brief Verify the pre-registered of the topic
  *
- * 		Verifica se o tópico já foi pré-registrado antes de iniciar qualquer operação
+ *    Verify if the topic has beend registered before init. the any operation
  *
- *  @param [in] topic Tópico a ser verificado
+ *  @param [in] topic Topic to be verified
  *
- *  @retval FAIL_CON      Tópico não foi pré-registrado
- *  @retval SUCCESS_CON   Tópico registrado no vetor de tópicos
+ *  @retval FAIL_CON      Topic was not registered
+ *  @retval SUCCESS_CON   Topic was registered
  *
  **/
 resp_con_t verf_register(char *topic);
 
-/** @brief Envia mensagem de LWT
+/** @brief Send LWT message
  *
- * 		Envia mensagem a ser publicada quando o tópico se desconectar
+ * 		Send the message LWT when disconnect occurs
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval FAIL_CON      Falha ao enviar a mensagem Will MSG
- *  @retval SUCCESS_CON   Sucesso ao enviar a mensagem Will MSG
+ *  @retval FAIL_CON      Fail to send a message Will MSG
+ *  @retval SUCCESS_CON   Success to send a message Will MSG
  *
  **/
 resp_con_t mqtt_sn_will_message_send(void);
 
-/** @brief Envia tópico de LWT
+/** @brief Send the topic LWT
  *
- * 		Envia tópico utilizado quando o dispositivo se desconectar
+ * 		Send the topic used when the device disconnect itself
  *
- *  @param [in] 0 Não recebe argumento
+ *  @param [in] 0 Doesn't receive args
  *
- *  @retval FAIL_CON      Falha ao enviar a mensagem Will MSG
- *  @retval SUCCESS_CON   Sucesso ao enviar a mensagem Will MSG
+ *  @retval FAIL_CON      Fail to send a message Will MSG
+ *  @retval SUCCESS_CON   Success to send a message Will MSG
  *
  **/
 resp_con_t mqtt_sn_will_topic_send(void);
 
-/** @brief Callback de recepção UDP
+/** @brief Callback of UDP reception
  *
- * 		Recebe dados da conexão UDP com o broker
+ * 		Receive data of connection UDP with the broker
  *
- *  @param [in] simple_udp_connection Handle da conexão UDP
- *  @param [in] sender_addr Endereço IP do broker
- *  @param [in] sender_port Porta de envio
- *  @param [in] receiver_addr Endereço IP de recepção
- *  @param [in] receiver_port Porta de recepção
- *  @param [in] data Dado recebido
- *  @param [in] datalen Tamanho do dado recebido
+ *  @param [in] simple_udp_connection Handle of UDP connection
+ *  @param [in] sender_addr IP address of the broker
+ *  @param [in] sender_port Port of send
+ *  @param [in] receiver_addr Reception address
+ *  @param [in] receiver_port Reception port
+ *  @param [in] data Data received
+ *  @param [in] datalen Size of the data received
  *
- *  @retval 0 Não retorna parâmetro
+ *  @retval 0 Doens't return data
  *
  **/
 void mqtt_sn_udp_rec_cb(struct simple_udp_connection *c,
@@ -860,28 +852,28 @@ void mqtt_sn_udp_rec_cb(struct simple_udp_connection *c,
                             const uint8_t *data,
                             uint16_t datalen);
 
-/** @brief Prepara tarefa de SUBSCRIBE do tipo WILDCARD
+/** @brief Prepares the SUBSCRIBE task of type WILDCARD
  *
- * 		Gera tarefa de inscrição com Wildcard ao broker MQTT-SN
+ * 		Generate the tasks of subscription with Wildcard to the broker MQTT-SN
  *
- *  @param [in] topic Tópico a ser inscrito (deve estar pré-listado e passado como argumento em mqtt_sn_create_sck)
- *  @param [in] qos Nível de QoS da publicação
+ *  @param [in] topic Topic to subscribe (must be pre-registered and passed to mqtt_sn_create_sck)
+ *  @param [in] qos QoS level of publish
  *
- *  @retval FAIL_CON      Falha ao enviar a inscrição
- *  @retval SUCCESS_CON   Sucesso ao enviar a inscrição
+ *  @retval FAIL_CON      Fail to send a subscribe
+ *  @retval SUCCESS_CON   Success to send a subscribe
  *
  **/
 resp_con_t mqtt_sn_sub_wildcard(char *topic, uint8_t qos);
 
-/** @brief Envia pacote do tipo REGACK ao broker
+/** @brief Send the packet of type REGACK to the broker
  *
- * 		Envia ao broker MQTT-SN a mensagem do tipo REGACK quando receber algum tópico via Wildcad
+ * 		Send to the broker MQTT-SN a message of type REGACK when it receives any topic through Wildcad
  *
- *  @param [in] msg_id Message id correspondente do envio
- *  @param [in] topic_id Topic ID enviado pelo broker para registrar no vetor de tópicos o tópico novo
+ *  @param [in] msg_id Message id correspondent to the send
+ *  @param [in] topic_id Topic ID send by the broker to register a new vector of topics
  *
- *  @retval FAIL_CON      Falha ao enviar a regack
- *  @retval SUCCESS_CON   Sucesso ao enviar a regack
+ *  @retval FAIL_CON      Fail to send a regack
+ *  @retval SUCCESS_CON   Success to send a regack
  *
  **/
 resp_con_t mqtt_sn_regack_send(uint16_t msg_id, uint16_t topic_id);
